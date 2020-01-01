@@ -1,10 +1,8 @@
 import React, { Component } from 'react'
 import Board from './Board';
+import Text from './Text';
 import { ListGroup } from 'react-bootstrap';
 import * as Helper from './Helper';
-
-
-
 
 export default class Game extends Component {
 
@@ -34,8 +32,8 @@ export default class Game extends Component {
 
 
     handleClick(row, col) {
-        var winner  = this.state.isWin;
-        if ( winner)return;
+        var winner = this.state.isWin;
+        if (winner) return;
         var temp = this.state.board; //Hold the board
         const allColumn = temp[row];
         const square = allColumn[col];
@@ -142,7 +140,7 @@ export default class Game extends Component {
         //if gray want "eat" gray
         else if (garyTurn && (first[0] - second[0] !== 1 || square === 'G' ||
             Math.abs(first[1] - second[1]) !== 1)) {
-            this.setState({ status: "Gray Player: Wrong Progressed - You can move just one line" })
+            this.setState({ status: "Wrong Progressed - You can move just one line" })
             correct = false;
         }
 
@@ -152,7 +150,7 @@ export default class Game extends Component {
         //if black want "eat" black
         else if (!garyTurn && (second[0] - first[0] !== 1 || square === 'B' ||
             Math.abs(first[1] - second[1]) !== 1)) {
-            this.setState({ status: "Black Player: Wrong Progressed - You can move just one line" })
+            this.setState({ status: "Wrong Progressed - You can move just one line" })
             correct = false;
         }
 
@@ -257,12 +255,12 @@ export default class Game extends Component {
                 if (kingIndex !== -1)
                     temp[7] = Helper.changeTo(temp[7], kingIndex, 'KB')
             }
-            else if (winner === 'G') 
+            else if (winner === 'G')
                 this.setState({ status: "Gray is win!!" })
-            
-            else if (winner === 'B') 
+
+            else if (winner === 'B')
                 this.setState({ status: "Black is win!!" })
-            
+
 
             this.setState({
                 board: temp,
@@ -290,22 +288,22 @@ export default class Game extends Component {
 
         const board = this.state.board;
         return (
-            <div className="center">
-                <div >
-                    <h3>{this.state.status}</h3>
+            <div >
+                <div className="center">
+                    {board.map((row, i) => (
+                        <div className="row" key={i}>
+                            {row.map((col, j) => (
+                                <ListGroup key={j}>
+                                    <Board allRow={row} row={i} col={j}
+                                        onClick={(row, col) => this.handleClick(i, j)} >
+                                    </Board>
+                                </ListGroup>
+                            ))}
+                        </div>
+                    ))}
                 </div>
-                {board.map((row, i) => (
-                    <div className="row" key={i}>
-                        {row.map((col, j) => (
-                            <ListGroup key={j}>
-                                <Board allRow={row} row={i} col={j}
-                                    onClick={(row, col) => this.handleClick(i, j)} >
-                                </Board>
-                            </ListGroup>
-                        ))}
-                    </div>
-                ))}
 
+                <Text turn={this.state.isGrayTurn} status={this.state.status} />
 
             </div>
         );
