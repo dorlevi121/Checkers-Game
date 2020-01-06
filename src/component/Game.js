@@ -3,6 +3,9 @@ import Board from './Board';
 import Text from './Text';
 import { ListGroup } from 'react-bootstrap';
 import * as Helper from './Helper';
+import Button from 'react-bootstrap/Button'
+
+const INITIAL_BOARD = Helper.board;
 
 export default class Game extends Component {
 
@@ -10,22 +13,15 @@ export default class Game extends Component {
         super(props);
 
         this.state = {
-            board: [
-                [null, 'B', null, 'B', null, 'B', null, 'B'],
-                ['B', null, 'B', null, 'B', null, 'B', null],
-                [null, 'B', null, 'B', null, 'B', null, 'B'],
-                ['X', null, 'X', null, 'X', null, 'X', null],
-                [null, 'X', null, 'X', null, 'X', null, 'X'],
-                ['G', null, 'G', null, 'G', null, 'G', null],
-                [null, 'G', null, 'G', null, 'G', null, 'G'],
-                ['G', null, 'G', null, 'G', null, 'G', null],
-            ],
+            board: this.getBoard(),
             isGrayTurn: false,
             firstClick: [-1, -1],
             secondClick: [-1, -1],
             status: "",
             isKing: false,
-            isWin: false
+            isWin: false,
+            history: Array(0),
+            redo: Array(0)
         };
     }
 
@@ -34,7 +30,7 @@ export default class Game extends Component {
     handleClick(row, col) {
         var winner = this.state.isWin;
         if (winner) return;
-        var temp = this.state.board; //Hold the board
+        var temp = this.cloneArrayBoard(this.state.board); //Hold the board
         const allColumn = temp[row];
         const square = allColumn[col];
 
@@ -121,15 +117,12 @@ export default class Game extends Component {
             if (ans !== false && correct) {
                 temp = ans;
                 const bRow = temp[first[0]];
-                bRow[first[1]] = 'X';
-                temp[first[0]] = bRow;
+                temp[first[0]] = Helper.changeTo(bRow, first[1], 'X');
                 //Move the King
                 const tRow = temp[second[0]];
-                tRow[second[1]] = player;
-                temp[second[0]] = tRow;
+                temp[second[0]] = Helper.changeTo(tRow, second[1], player);
             }
             else correct = false;
-
         }
 
 
@@ -163,16 +156,19 @@ export default class Game extends Component {
             temp[first[0]] = Helper.changeTo(temp[first[0]], first[1], 'X');
             correct = true;
         }
-        //Gray Turn//
-        else if (square === 'B' && !winner) {
+        //Turn//
+        else if (square !== 'X' && !winner) {
             //Check if there is a player on the sqauer after 
             const r = second[0];
             let c = second[1];
+            var nextRow;
             if (first[1] > c) c--;
             else c++;
 
-            const t = temp[r - 1];
-            if (t[c] !== 'X') {
+            if (!garyTurn) nextRow = r + 1;
+            else nextRow = r - 1;
+            let nRow = temp[nextRow];
+            if (nRow[c] !== 'X') {
                 correct = false;
                 this.setState({ status: "Can't move to this square - no empty square" })
             }
@@ -184,14 +180,8 @@ export default class Game extends Component {
                 //Make the cuurent square to empty
                 temp[first[0]] = Helper.changeTo(temp[first[0]], first[1], 'X');
 
-                //Put the gray player in a square 
-                second[0]--;
-                if (first[1] > second[1])
-                    second[1]--;
-                else
-                    second[1]++;
-
-                temp[second[0]] = Helper.changeTo(temp[second[0]], second[1], 'G');
+                //Put the  player in a square 
+                temp[nextRow] = Helper.changeTo(nRow, c, garyTurn ? 'G' : 'B');
                 correct = true;
             }
 
@@ -201,45 +191,6 @@ export default class Game extends Component {
             }
         }
 
-        //Black Turn//
-        else if (square === 'G' && !winner) {
-            //Check if there is a player on the sqauer after 
-            const r = second[0];
-            let c = second[1];
-            if (first[1] > c)
-                c--;
-            else
-                c++;
-
-            const t = temp[r + 1];
-            if (t[c] !== 'X') {
-                correct = false;
-                this.setState({ status: "Can't move to this square - no empty square" })
-
-            }
-            else if (Helper.checkEdge(row, col)) {
-                //Change the square with black to X
-                temp[row] = Helper.changeTo(temp[row], col, 'X');
-
-
-                //Make the cuurent square to empty
-                temp[first[0]] = Helper.changeTo(temp[first[0]], first[1], 'X');
-
-                //Put the gray player in a square 
-                second[0]++;
-                if (first[1] > second[1])
-                    second[1]--;
-                else
-                    second[1]++;
-                temp[second[0]] = Helper.changeTo(temp[second[0]], second[1], 'B');
-                correct = true;
-            }
-            else {
-                correct = false;
-                this.setState({ status: "Can move to this square" })
-            }
-
-        }
 
         if (correct) {
             winner = Helper.checkWin(temp);
@@ -255,14 +206,20 @@ export default class Game extends Component {
                 if (kingIndex !== -1)
                     temp[7] = Helper.changeTo(temp[7], kingIndex, 'KB')
             }
-            else if (winner === 'G')
+            else if (winner === 'G'){
                 this.setState({ status: "Gray is win!!" })
+                this.setState({ turn: "Gray is win!!" })
+            }
 
-            else if (winner === 'B')
+            else if (winner === 'B'){
                 this.setState({ status: "Black is win!!" })
-
-
+                this.setState({ turn: "Black is win!!" })
+            }
+            const oldBoard = this.state.history;
+            oldBoard.push(this.cloneArrayBoard(this.state.board));
+            
             this.setState({
+                history: oldBoard,
                 board: temp,
                 firstClick: [-1, -1],
                 secondClick: [-1, -1],
@@ -283,13 +240,72 @@ export default class Game extends Component {
     }
 
 
+    getBoard = () => {
+        return this.cloneArrayBoard(INITIAL_BOARD);
+    } 
+
+    //Clone the 2Darray
+    cloneArrayBoard = (array) =>{
+        return array.map( o => [...o]);
+    }
+
+    undo = () =>{
+        if(this.state.history.length < 1){
+            this.setState({ 
+                status: "Cant do undo anymore!!" })
+        }
+        else{
+            const history = this.state.history;
+            const redo = this.state.redo;
+            redo.push(this.state.board);
+            this.setState({
+                board: this.cloneArrayBoard(history.pop()),
+                history: history,
+                redo: redo,
+                isGrayTurn: !this.state.isGrayTurn
+            });
+        }
+    }
+
+    redo = () =>{
+        if(this.state.redo.length < 1){
+            this.setState({ 
+                status: "Cant do redo anymore!!" })
+        }
+        else{
+            const redo = this.state.redo;
+            const history = this.state.history;
+            history.push(this.state.board);
+            this.setState({
+                board: this.cloneArrayBoard(redo.pop()),
+                redo: redo,
+                history: history,
+                isGrayTurn: !this.state.isGrayTurn
+            });
+        }
+    }
+
+    start = () => {
+        this.setState({
+            board: this.getBoard(),
+            isGrayTurn: false,
+            firstClick: [-1, -1],
+            secondClick: [-1, -1],
+            status: "",
+            isKing: false,
+            isWin: false,
+            history: Array(0),
+            redo: Array(0)
+        })
+    }
+
     render() {
         console.log('render')
 
         const board = this.state.board;
         return (
-            <div >
-                <div className="center">
+            <div className="center" >
+                <div >
                     {board.map((row, i) => (
                         <div className="row" key={i}>
                             {row.map((col, j) => (
@@ -304,7 +320,9 @@ export default class Game extends Component {
                 </div>
 
                 <Text turn={this.state.isGrayTurn} status={this.state.status} />
-
+                <Button variant="secondary" onClick = {this.undo}>Undo</Button>
+                <Button variant="dark" onClick = {this.redo}>Redo</Button>
+                <Button variant="secondary" onClick = {this.start}>Start New Game</Button>
             </div>
         );
     }

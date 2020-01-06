@@ -1,3 +1,14 @@
+export const board = [
+    [null, 'B', null, 'B', null, 'B', null, 'B'],
+    ['B', null, 'B', null, 'B', null, 'B', null],
+    [null, 'B', null, 'B', null, 'B', null, 'B'],
+    ['X', null, 'X', null, 'X', null, 'X', null],
+    [null, 'X', null, 'X', null, 'X', null, 'X'],
+    ['G', null, 'G', null, 'G', null, 'G', null],
+    [null, 'G', null, 'G', null, 'G', null, 'G'],
+    ['G', null, 'G', null, 'G', null, 'G', null],
+];
+
 
 export function changeTo(row, col, sq) {
     row[col] = sq; //Change the square to empty
@@ -86,7 +97,6 @@ export function checkIfKingCanEatFromTopRight(firstRow, firstCol, secondRow, boa
     return board;
 }
 
-
 export function checkWin(board) {
     var bPlayers = 0;
     var gPlayers = 0;
@@ -97,8 +107,8 @@ export function checkWin(board) {
             else if (row[j] === 'B' || row[j] === 'KB') bPlayers++;
         }
     }
-    if(bPlayers === 0) return 'G'
-    else if(gPlayers ===0) return 'B'
+    if (bPlayers === 0) return 'G'
+    else if (gPlayers === 0) return 'B'
 
     return false;
 }
