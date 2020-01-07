@@ -206,18 +206,18 @@ export default class Game extends Component {
                 if (kingIndex !== -1)
                     temp[7] = Helper.changeTo(temp[7], kingIndex, 'KB')
             }
-            else if (winner === 'G'){
+            else if (winner === 'G') {
                 this.setState({ status: "Gray is win!!" })
                 this.setState({ turn: "Gray is win!!" })
             }
 
-            else if (winner === 'B'){
+            else if (winner === 'B') {
                 this.setState({ status: "Black is win!!" })
                 this.setState({ turn: "Black is win!!" })
             }
             const oldBoard = this.state.history;
             oldBoard.push(this.cloneArrayBoard(this.state.board));
-            
+
             this.setState({
                 history: oldBoard,
                 board: temp,
@@ -242,19 +242,20 @@ export default class Game extends Component {
 
     getBoard = () => {
         return this.cloneArrayBoard(INITIAL_BOARD);
-    } 
-
-    //Clone the 2Darray
-    cloneArrayBoard = (array) =>{
-        return array.map( o => [...o]);
     }
 
-    undo = () =>{
-        if(this.state.history.length < 1){
-            this.setState({ 
-                status: "Cant do undo anymore!!" })
+    //Clone the 2Darray
+    cloneArrayBoard = (array) => {
+        return array.map(o => [...o]);
+    }
+
+    undo = () => {
+        if (this.state.history.length < 1) {
+            this.setState({
+                status: "Cant do undo anymore!!"
+            })
         }
-        else{
+        else {
             const history = this.state.history;
             const redo = this.state.redo;
             redo.push(this.state.board);
@@ -267,12 +268,13 @@ export default class Game extends Component {
         }
     }
 
-    redo = () =>{
-        if(this.state.redo.length < 1){
-            this.setState({ 
-                status: "Cant do redo anymore!!" })
+    redo = () => {
+        if (this.state.redo.length < 1) {
+            this.setState({
+                status: "Cant do redo anymore!!"
+            })
         }
-        else{
+        else {
             const redo = this.state.redo;
             const history = this.state.history;
             history.push(this.state.board);
@@ -320,9 +322,9 @@ export default class Game extends Component {
                 </div>
 
                 <Text turn={this.state.isGrayTurn} status={this.state.status} />
-                <Button variant="secondary" onClick = {this.undo}>Undo</Button>
-                <Button variant="dark" onClick = {this.redo}>Redo</Button>
-                <Button variant="secondary" onClick = {this.start}>Start New Game</Button>
+                <Button variant="secondary" onClick={this.undo}>Undo</Button>
+                <Button variant="dark" onClick={this.redo}>Redo</Button>
+                <Button variant="secondary" onClick={this.start}>Start New Game</Button>
             </div>
         );
     }
