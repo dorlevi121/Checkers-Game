@@ -1,5 +1,5 @@
 ## Checkers-Game
-![game](http://picasion.com/i/2yDnn)
+![](http://i.picasion.com/pic89/c0b915e52ca57931ae20fbcaec86086c.gif)
 ### Using It
 Play by selecting your piece and clicking on the tile you want to move to. Click [here](http://www.itsyourturn.com/t_helptopic2030.html)  to learn how to play checkers. Jumping when available is enforced.
 
